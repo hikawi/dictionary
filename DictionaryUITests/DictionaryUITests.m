@@ -19,7 +19,8 @@
     // In UI tests it is usually best to stop immediately when a failure occurs.
     self.continueAfterFailure = NO;
 
-    // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+    // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests
+    // before they run. The setUp method is a good place to do this.
 }
 
 - (void)tearDown {
@@ -36,9 +37,10 @@
 
 - (void)testLaunchPerformance {
     // This measures how long it takes to launch your application.
-    [self measureWithMetrics:@[[[XCTApplicationLaunchMetric alloc] init]] block:^{
-        [[[XCUIApplication alloc] init] launch];
-    }];
+    [self measureWithMetrics:@[ [[XCTApplicationLaunchMetric alloc] init] ]
+                       block:^{
+                         [[[XCUIApplication alloc] init] launch];
+                       }];
 }
 
 @end
