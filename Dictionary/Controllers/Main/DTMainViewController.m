@@ -6,6 +6,7 @@
 //
 
 #import "DTMainViewController.h"
+#import "DTWordViewController.h"
 
 @interface DTMainViewController ()
 
@@ -16,17 +17,21 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    // Put the text "Hello, World" in the main screen.
-    UILabel *helloWorldLabel = [[UILabel alloc] init];
-    helloWorldLabel.text = @"Hello, World";
-    helloWorldLabel.textColor = UIColor.whiteColor;
-    helloWorldLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle1];
-    helloWorldLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.view addSubview:helloWorldLabel];
+    // Put the child view controller.
+    DTWordViewController *wordController = [[DTWordViewController alloc] initWithEntry:DTWordEntry.testWord];
+    wordController.view.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addChildViewController:wordController];
+    [self.view addSubview:wordController.view];
     [NSLayoutConstraint activateConstraints:@[
-        [helloWorldLabel.centerXAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.centerXAnchor],
-        [helloWorldLabel.centerYAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.centerYAnchor],
+        [wordController.view.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:16],
+        [wordController.view.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor
+                                                         constant:-16],
+        [wordController.view.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor
+                                                          constant:16],
+        [wordController.view.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor
+                                                           constant:-16],
     ]];
+    [wordController didMoveToParentViewController:self];
 }
 
 @end
