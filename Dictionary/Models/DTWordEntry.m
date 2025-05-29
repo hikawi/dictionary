@@ -25,6 +25,16 @@
     return self;
 }
 
+- (DTWordPhonetic *)firstUsablePhonetic {
+    for (DTWordPhonetic *phonetic in self.phonetics) {
+        if(![phonetic.text isEqualToString:@""] && phonetic.audio != NULL) {
+            return phonetic;
+        }
+    }
+
+    return [self.phonetics objectAtIndex:0];
+}
+
 + (DTWordEntry *)testWord {
     DTWordEntry *entry = [[DTWordEntry alloc] init];
 

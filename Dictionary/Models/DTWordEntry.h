@@ -21,6 +21,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSArray<DTWordMeaning *> *meanings;
 @property NSArray<NSURL *> *sources;
 
+/// Retrieves the first phonetic with a phonetic text and a link to the audio file.
+///
+/// - Returns: The first "usable" phonetic pointer.
+- (DTWordPhonetic *)firstUsablePhonetic;
+
 /// Retrieves the entry for the word used for testing (keyboard).
 ///
 /// - Returns: The word entry for "keyboard".
