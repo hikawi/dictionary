@@ -166,6 +166,9 @@
     }
 }
 
+- (void)loadWordSynonyms:(NSArray<NSString *> *)synonyms toStack:(UIStackView *)stackView {
+}
+
 /// Loads the word source URLs into the overall source stack view.
 ///
 /// This sets up a second stack view that has no separation, and add URIs here,
@@ -275,6 +278,8 @@
     for (DTWordMeaning *meaning in entry.meanings) {
         [self loadWordMeaning:meaning toStack:mainStackView];
     }
+
+    // Before adding the separator, it's the section for synonyms and antonyms.
 
     // Before we get to the final section of the screen, we have to add a separator.
     UIView *separatorView = [[UIView alloc] init];

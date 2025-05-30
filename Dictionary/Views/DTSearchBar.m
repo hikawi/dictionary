@@ -6,6 +6,7 @@
 //
 
 #import "DTSearchBar.h"
+#import "Utils/DTFontManager.h"
 
 @interface DTSearchBar () <UITextFieldDelegate>
 
@@ -52,7 +53,7 @@
     self.field.backgroundColor = UIColor.clearColor;
     self.field.layoutMargins = UIEdgeInsetsZero;
     self.field.textColor = [UIColor colorNamed:@"DictionaryPrimaryLabel"];
-    self.field.font = [UIFont systemFontOfSize:16 weight:UIFontWeightBold];
+    self.field.font = [DTFontManager fontOfSize:16 weight:DTFontWeightBold];
     self.field.delegate = self;
     self.field.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:self.field];
@@ -78,6 +79,11 @@
         [self.delegate searchDidPress:self.field.text];
         [self.field resignFirstResponder];
     }
+}
+
+- (BOOL)resignFirstResponder {
+    [self.field resignFirstResponder];
+    return [super resignFirstResponder];
 }
 
 - (CGSize)intrinsicContentSize {

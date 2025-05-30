@@ -10,6 +10,7 @@
 #import "Controllers/Error/DTErrorViewController.h"
 #import "Controllers/Loading/DTLoadingViewController.h"
 #import "DTWordViewController.h"
+#import "Utils/DTFontManager.h"
 #import "Views/DTSearchBar.h"
 
 @interface DTMainViewController () <DTSearchBarDelegate>
@@ -72,6 +73,17 @@
         [iconImageView.widthAnchor constraintLessThanOrEqualToConstant:32],
     ]];
 
+    // Put the font switch on the top right.
+//    UIButton *fontSwitcher = [UIButton buttonWithType:UIButtonTypeSystem];
+//    [fontSwitcher setTitle:@"Hello" forState:UIControlStateNormal];
+//    [fontSwitcher addTarget:self action:@selector(fontDidSwitch) forControlEvents:UIControlEventTouchUpInside];
+//    fontSwitcher.translatesAutoresizingMaskIntoConstraints = NO;
+//    [self.view addSubview:fontSwitcher];
+//    [NSLayoutConstraint activateConstraints:@[
+//        [fontSwitcher.centerYAnchor constraintEqualToAnchor:iconImageView.centerYAnchor],
+//        [fontSwitcher.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
+//    ]];
+
     // Put the search bar right below.
     self.searchBar = [[DTSearchBar alloc] init];
     self.searchBar.delegate = self;
@@ -85,6 +97,14 @@
     ]];
 
     // For everywhere on the screen, tapping resigns the search bar's responder.
+    self.view.userInteractionEnabled = YES;
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] init];
+    [tapGesture addTarget:self action:@selector(resignKeyboard)];
+    [self.view addGestureRecognizer:tapGesture];
+}
+
+- (void)resignKeyboard {
+    [self.searchBar resignFirstResponder];
 }
 
 - (void)handleData:(NSData *)data response:(NSURLResponse *)response error:(NSError *)error {
@@ -165,6 +185,23 @@
 
     // Display.
     [self setupChildController:[[DTWordViewController alloc] initWithEntries:entries]];
+}
+
+- (void)fontDidSwitch {
+    switch (DTFontManager.fontType) {
+    case DTFontTypeSansSerif:
+        DTFontManager.fontType = DTFontTypeSerif;
+        break;
+    case DTFontTypeSerif:
+        DTFontManager.fontType = DTFontTypeMonospaced;
+        break;
+    default:
+        DTFontManager.fontType = DTFontTypeSansSerif;
+        break;
+    }
+
+    // TODO - Add a proper handling of stuff here, instead of resetting the view to reload fonts.
+    [self viewDidLoad];
 }
 
 - (void)searchDidPress:(NSString *)query {
