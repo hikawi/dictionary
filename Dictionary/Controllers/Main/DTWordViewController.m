@@ -6,26 +6,31 @@
 //
 
 #import "DTWordViewController.h"
+#import "Views/DTPlaySoundButton.h"
 #import "Views/DTURLButton.h"
 #import <AVFoundation/AVFoundation.h>
 
 @interface DTWordViewController ()
 
-@property DTWordPhonetic *phonetic;
-@property(strong) AVAudioPlayer *audioPlayer;
+@property NSArray<DTWordEntry *> *entries;
 
 @end
 
 @implementation DTWordViewController
 
-@synthesize entry;
-@synthesize phonetic;
-@synthesize audioPlayer;
+@synthesize entries;
 
-- (instancetype)initWithEntry:(DTWordEntry *)entry {
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.entries = @[];
+    }
+    return self;
+}
+
+- (instancetype)initWithEntries:(NSArray<DTWordEntry *> *)entries {
     self = [self init];
-    self.entry = entry;
-    self.phonetic = entry.firstUsablePhonetic;
+    self.entries = entries;
     return self;
 }
 
@@ -68,7 +73,7 @@
     ]];
 
     // If there's no example, we stretch the definition to cover the view and return.
-    if(definition.example == NULL) {
+    if (definition.example == NULL) {
         [definitionLabel.bottomAnchor constraintEqualToAnchor:definitionView.bottomAnchor].active = YES;
         return;
     }
@@ -156,7 +161,7 @@
     [meaningStackView addArrangedSubview:definitionStackView];
 
     // For each definition, we add to the provided stack view.
-    for(DTWordDefinition *definition in meaning.definitions) {
+    for (DTWordDefinition *definition in meaning.definitions) {
         [self loadWordDefinition:definition toStack:definitionStackView];
     }
 }
@@ -213,23 +218,15 @@
     }
 }
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-
-    // Setup the scroll view for the word view, as a lot of words may have too much content to display in one screen.
-    UIScrollView *mainScrollView = [[UIScrollView alloc] init];
-    mainScrollView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.view addSubview:mainScrollView];
-    [NSLayoutConstraint activateConstraints:@[
-        [mainScrollView.safeAreaLayoutGuide.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-        [mainScrollView.safeAreaLayoutGuide.bottomAnchor
-            constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
-        [mainScrollView.safeAreaLayoutGuide.leadingAnchor
-            constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [mainScrollView.safeAreaLayoutGuide.trailingAnchor
-            constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-    ]];
-
+/// Loads an entire word entry to the main stack view.
+///
+/// As a word may have multiple entires, eg. lead having a "leader" type of entry and a "lead" the material
+/// type of entry. Therefore this screen has to be able to handle multiple entries of the same word.
+///
+/// - Parameters:
+///   - entry: The word entry to load.
+///   - stackView: The stack view to put into.
+- (void)loadWordEntry:(DTWordEntry *)entry toStack:(UIStackView *)stackView {
     // Now the stack view to simulate the design using flexboxes. The main stack view separates
     // elements at 32px each.
     UIStackView *mainStackView = [[UIStackView alloc] init];
@@ -237,12 +234,7 @@
     mainStackView.spacing = 32;
     mainStackView.alignment = UIStackViewAlignmentFill;
     mainStackView.translatesAutoresizingMaskIntoConstraints = NO;
-    [mainScrollView addSubview:mainStackView];
-    [NSLayoutConstraint activateConstraints:@[
-        [mainStackView.topAnchor constraintEqualToAnchor:mainScrollView.safeAreaLayoutGuide.topAnchor],
-        [mainStackView.leadingAnchor constraintEqualToAnchor:mainScrollView.safeAreaLayoutGuide.leadingAnchor],
-        [mainStackView.trailingAnchor constraintEqualToAnchor:mainScrollView.safeAreaLayoutGuide.trailingAnchor],
-    ]];
+    [stackView addArrangedSubview:mainStackView];
 
     // Top section would contain the word's spelling, phonetics and a play button to play
     // the pronuniciation for that word.
@@ -263,42 +255,24 @@
 
     // The UILabels to draw the spelling.
     UILabel *spellingLabel = [[UILabel alloc] init];
-    spellingLabel.text = self.entry.word;
+    spellingLabel.text = entry.word;
     spellingLabel.textColor = [UIColor colorNamed:@"DictionaryPrimaryLabel"];
     spellingLabel.font = [UIFont systemFontOfSize:32 weight:UIFontWeightBold];
     [spellingStackView addArrangedSubview:spellingLabel];
 
     // The UILabel to draw the phonetic.
     UILabel *phoneticLabel = [[UILabel alloc] init];
-    phoneticLabel.text = self.phonetic.text;
+    phoneticLabel.text = entry.phonetic;
     phoneticLabel.textColor = [UIColor colorNamed:@"DictionaryPrimary"];
     phoneticLabel.font = [UIFont systemFontOfSize:18];
     [spellingStackView addArrangedSubview:phoneticLabel];
 
     // Let's setup that play button with some image assets we set up in Assets.
-    UIImage *playImage = [UIImage imageNamed:@"DictionaryPlaySoundIcon"];
-    UIImage *playHighlightedImage = [UIImage imageNamed:@"DictionaryPlaySoundHighlightedIcon"];
-    UIButton *playButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    playButton.contentMode = UIViewContentModeScaleAspectFit;
-    [playButton setImage:playImage forState:UIControlStateNormal];
-    [playButton setImage:playHighlightedImage forState:UIControlStateHighlighted];
-    [playButton setImage:playHighlightedImage forState:UIControlStateFocused];
-    [playButton setImage:playHighlightedImage forState:UIControlStateSelected];
-    [playButton setImage:[playImage imageWithTintColor:UIColor.systemGrayColor] forState:UIControlStateDisabled];
-    [playButton addTarget:self action:@selector(playAudio) forControlEvents:UIControlEventTouchUpInside];
-    [NSLayoutConstraint activateConstraints:@[
-        [playButton.heightAnchor constraintEqualToConstant:48],
-        [playButton.widthAnchor constraintEqualToConstant:48],
-    ]];
+    DTPlaySoundButton *playButton = [[DTPlaySoundButton alloc] initWithAudio:entry.firstUsablePhonetic.audio];
     [overviewStackView addArrangedSubview:playButton];
 
-    // Disable the play button if the audio is not available.
-    if (self.phonetic.audio == NULL) {
-        playButton.enabled = NO;
-    }
-
     // Now we pushes in the word meanings.
-    for (DTWordMeaning *meaning in self.entry.meanings) {
+    for (DTWordMeaning *meaning in entry.meanings) {
         [self loadWordMeaning:meaning toStack:mainStackView];
     }
 
@@ -331,35 +305,44 @@
     [sourceStackView addArrangedSubview:sourceLabel];
 
     // Now we add individual source URLs to the source stack view.
-    [self loadWordSources:self.entry.sources toStack:sourceStackView];
+    [self loadWordSources:entry.sources toStack:sourceStackView];
 }
 
-#pragma mark - Delegated methods
+- (void)viewDidLoad {
+    [super viewDidLoad];
 
-/// Plays the audio associated at the phonetic's URL using AVFoundation's AVPlayer.
-- (void)playAudio {
-    if (self.audioPlayer != NULL && self.audioPlayer.playing) {
-        // Stop the audio if it's playing.
-        [self.audioPlayer stop];
-    } else if (self.audioPlayer == NULL) {
-        // If it's not fetched yet, fetch the audio file.
-        NSURLSessionDataTask *task =
-            [NSURLSession.sharedSession dataTaskWithURL:self.phonetic.audio
-                                      completionHandler:^(NSData *data, id response, NSError *error) {
-                                        self.audioPlayer = [[AVAudioPlayer alloc] initWithData:data error:&error];
-                                        if (error != NULL) {
-                                            NSLog(@"%@", error);
-                                        }
+    // Setup the scroll view for the word view, as a lot of words may have too much content to display in one screen.
+    UIScrollView *mainScrollView = [[UIScrollView alloc] init];
+    mainScrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    mainScrollView.showsVerticalScrollIndicator = NO;
+    [self.view addSubview:mainScrollView];
+    [NSLayoutConstraint activateConstraints:@[
+        [mainScrollView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
+        [mainScrollView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
+        [mainScrollView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [mainScrollView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+    ]];
 
-                                        self.audioPlayer.volume = 1;
-                                        [self.audioPlayer prepareToPlay];
-                                        [self.audioPlayer play];
-                                      }];
-        [task resume];
-    } else {
-        // Reuse the audio if it's already fetched.
-        [self.audioPlayer prepareToPlay];
-        [self.audioPlayer play];
+    // Now the stack view to simulate the design using flexboxes. The main stack view separates
+    // elements at 48px each.
+    // This stack view is the one that separates between ENTRIES.
+    UIStackView *mainStackView = [[UIStackView alloc] init];
+    mainStackView.axis = UILayoutConstraintAxisVertical;
+    mainStackView.spacing = 48;
+    mainStackView.alignment = UIStackViewAlignmentFill;
+    mainStackView.translatesAutoresizingMaskIntoConstraints = NO;
+    [mainScrollView addSubview:mainStackView];
+    [NSLayoutConstraint activateConstraints:@[
+        [mainStackView.topAnchor constraintEqualToAnchor:mainScrollView.contentLayoutGuide.topAnchor],
+        [mainStackView.leadingAnchor constraintEqualToAnchor:mainScrollView.contentLayoutGuide.leadingAnchor],
+        [mainStackView.trailingAnchor constraintEqualToAnchor:mainScrollView.contentLayoutGuide.trailingAnchor],
+        [mainStackView.bottomAnchor constraintEqualToAnchor:mainScrollView.contentLayoutGuide.bottomAnchor],
+        [mainStackView.widthAnchor constraintEqualToAnchor:mainScrollView.frameLayoutGuide.widthAnchor],
+    ]];
+
+    // For each entry, we load onto that stack view.
+    for (DTWordEntry *entry in self.entries) {
+        [self loadWordEntry:entry toStack:mainStackView];
     }
 }
 

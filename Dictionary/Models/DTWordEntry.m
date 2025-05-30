@@ -10,6 +10,7 @@
 @implementation DTWordEntry
 
 @synthesize word;
+@synthesize phonetic;
 @synthesize phonetics;
 @synthesize meanings;
 @synthesize sources;
@@ -32,7 +33,7 @@
         }
     }
 
-    return [self.phonetics objectAtIndex:0];
+    return NULL;
 }
 
 + (DTWordEntry *)testWord {

@@ -5,8 +5,8 @@
 //  Created by Luna on 2025/05/28.
 //
 
-#import <UIKit/UIKit.h>
 #import "Models/DTWordEntry.h"
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -15,11 +15,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property DTWordEntry *entry;
 
-/// Initializes the word view controller with a word entry.
+/// Initializes the word view controller with word entries.
 ///
 /// - Parameters:
-///   - entry: The word entry.
-- (instancetype)initWithEntry:(DTWordEntry *)entry;
+///   - entries: The word entries.
+- (instancetype)initWithEntries:(NSArray<DTWordEntry *> *)entries;
 
 @end
 

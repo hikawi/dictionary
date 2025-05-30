@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DTWordEntry : NSObject
 
 @property NSString *word;
+@property NSString *phonetic;
 @property NSArray<DTWordPhonetic *> *phonetics;
 @property NSArray<DTWordMeaning *> *meanings;
 @property NSArray<NSURL *> *sources;
