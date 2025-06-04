@@ -11,9 +11,12 @@
 #import "Controllers/Loading/DTLoadingViewController.h"
 #import "DTWordViewController.h"
 #import "Utils/DTFontManager.h"
+#import "Views/DTFontSwitcher.h"
+#import "Views/DTFontSwitcherChoice.h"
 #import "Views/DTSearchBar.h"
+#import "Views/DTToggleSwitch.h"
 
-@interface DTMainViewController () <DTSearchBarDelegate>
+@interface DTMainViewController () <DTSearchBarDelegate, DTFontSwitcherChoiceDelegate>
 
 @property DTSearchBar *searchBar;
 @property UIViewController *childController;
@@ -23,6 +26,10 @@
 @implementation DTMainViewController
 
 @synthesize childController;
+
+- (void)handleChoice:(DTFontType)choice {
+    
+}
 
 /// Sets up a new child controller at a specified location.
 ///
@@ -42,10 +49,12 @@
     [self.view addSubview:self.childController.view];
     [NSLayoutConstraint activateConstraints:@[
         [self.childController.view.topAnchor constraintEqualToAnchor:self.searchBar.bottomAnchor constant:16],
-        [self.childController.view.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-16],
-        [self.childController.view.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.childController.view.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor
+                                                               constant:-16],
+        [self.childController.view.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor
+                                                                constant:16],
         [self.childController.view.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor
-                                                       constant:-16],
+                                                                 constant:-16],
     ]];
     [self.childController didMoveToParentViewController:self];
     [self.view setNeedsLayout];
@@ -73,16 +82,46 @@
         [iconImageView.widthAnchor constraintLessThanOrEqualToConstant:32],
     ]];
 
-    // Put the font switch on the top right.
-//    UIButton *fontSwitcher = [UIButton buttonWithType:UIButtonTypeSystem];
-//    [fontSwitcher setTitle:@"Hello" forState:UIControlStateNormal];
-//    [fontSwitcher addTarget:self action:@selector(fontDidSwitch) forControlEvents:UIControlEventTouchUpInside];
-//    fontSwitcher.translatesAutoresizingMaskIntoConstraints = NO;
-//    [self.view addSubview:fontSwitcher];
-//    [NSLayoutConstraint activateConstraints:@[
-//        [fontSwitcher.centerYAnchor constraintEqualToAnchor:iconImageView.centerYAnchor],
-//        [fontSwitcher.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
-//    ]];
+    // Put the theme switcher on the top right.
+    DTToggleSwitch *themeSwitch = [[DTToggleSwitch alloc] init];
+    themeSwitch.on = UIScreen.mainScreen.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+    themeSwitch.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:themeSwitch];
+    [NSLayoutConstraint activateConstraints:@[
+        [themeSwitch.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        [themeSwitch.centerYAnchor constraintEqualToAnchor:iconImageView.centerYAnchor],
+    ]];
+
+    // Put the vertical separator next to the theme switcher.
+    UIView *verticalSeparator = [[UIView alloc] initWithFrame:CGRectZero];
+    verticalSeparator.translatesAutoresizingMaskIntoConstraints = NO;
+    verticalSeparator.backgroundColor = [UIColor colorNamed:@"DictionaryTetriaryBackground"];
+    [self.view addSubview:verticalSeparator];
+    [NSLayoutConstraint activateConstraints:@[
+        [verticalSeparator.trailingAnchor constraintEqualToAnchor:themeSwitch.leadingAnchor constant:-16],
+        [verticalSeparator.centerYAnchor constraintEqualToAnchor:iconImageView.centerYAnchor],
+        [verticalSeparator.heightAnchor constraintEqualToConstant:32],
+        [verticalSeparator.widthAnchor constraintEqualToConstant:1],
+    ]];
+
+    // Put the font switcher.
+    DTFontSwitcher *fontSwitcher = [[DTFontSwitcher alloc] init];
+    [self.view addSubview:fontSwitcher];
+    [NSLayoutConstraint activateConstraints:@[
+        [fontSwitcher.centerYAnchor constraintEqualToAnchor:iconImageView.centerYAnchor],
+        [fontSwitcher.trailingAnchor constraintEqualToAnchor:verticalSeparator.leadingAnchor constant:-16],
+    ]];
+
+    //    UIButton *fontSwitcher = [UIButton buttonWithType:UIButtonTypeSystem];
+    //    [fontSwitcher setTitle:@"Hello" forState:UIControlStateNormal];
+    //    [fontSwitcher addTarget:self action:@selector(fontDidSwitch) forControlEvents:UIControlEventTouchUpInside];
+    //    fontSwitcher.translatesAutoresizingMaskIntoConstraints = NO;
+    //    [self.view addSubview:fontSwitcher];
+    //    [NSLayoutConstraint activateConstraints:@[
+    //        [fontSwitcher.centerYAnchor constraintEqualToAnchor:iconImageView.centerYAnchor],
+    //        [fontSwitcher.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor
+    //        constant:-16],
+    //    ]];
 
     // Put the search bar right below.
     self.searchBar = [[DTSearchBar alloc] init];
