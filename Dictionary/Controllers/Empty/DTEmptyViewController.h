@@ -6,12 +6,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Views/DTFontSwitcherChoice.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /// Holds a view controller that displays a simple message that a word can not be found
 /// or looked up from the API.
-@interface DTEmptyViewController : UIViewController
+@interface DTEmptyViewController : UIViewController <DTFontSwitcherChoiceDelegate>
 
 @end
 

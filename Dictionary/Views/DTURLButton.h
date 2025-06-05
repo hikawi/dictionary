@@ -5,12 +5,13 @@
 //  Created by Luna on 2025/05/29.
 //
 
+#import "DTFontSwitcherChoice.h"
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 /// Represents a button that can be clicked to open up a link.
-@interface DTURLButton : UIButton
+@interface DTURLButton : UIButton <DTFontSwitcherChoiceDelegate>
 
 @property NSURL *url;
 

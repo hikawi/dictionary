@@ -6,12 +6,19 @@
 //
 
 #import "DTLoadingViewController.h"
+#import "Utils/DTFontManager.h"
 
-@interface DTLoadingViewController ()
+@interface DTLoadingViewController () {
+    UILabel *loadingLabel;
+}
 
 @end
 
 @implementation DTLoadingViewController
+
+- (void)handleChoice:(DTFontType)choice {
+    loadingLabel.font = [DTFontManager fontOfSize:16];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -41,10 +48,10 @@
     [mainStackView addArrangedSubview:progressImageView];
 
     // Setup the "Loading" text.
-    UILabel *loadingLabel = [[UILabel alloc] init];
+    loadingLabel = [[UILabel alloc] init];
     loadingLabel.text = @"Loading...";
     loadingLabel.textColor = [UIColor colorNamed:@"DictionarySecondaryLabel"];
-    loadingLabel.font = [UIFont systemFontOfSize:16];
+    loadingLabel.font = [DTFontManager fontOfSize:16];
     [mainStackView addArrangedSubview:loadingLabel];
 
     // Setup the animation cycle for the progress indicator.

@@ -26,6 +26,10 @@
     return self;
 }
 
+- (void)handleChoice:(DTFontType)type {
+    field.font = [DTFontManager fontOfSize:16 weight:DTFontWeightBold];
+}
+
 - (void)setup {
     self.translatesAutoresizingMaskIntoConstraints = NO;
     self.backgroundColor = [UIColor colorNamed:@"DictionarySecondaryBackground"];

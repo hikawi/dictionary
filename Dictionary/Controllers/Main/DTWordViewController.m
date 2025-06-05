@@ -6,6 +6,7 @@
 //
 
 #import "DTWordViewController.h"
+#import "Views/DTFontSensitiveLabel.h"
 #import "Views/DTPlaySoundButton.h"
 #import "Views/DTURLButton.h"
 #import <AVFoundation/AVFoundation.h>
@@ -13,6 +14,7 @@
 @interface DTWordViewController ()
 
 @property NSArray<DTWordEntry *> *entries;
+@property NSMutableArray<id<DTFontSwitcherChoiceDelegate>> *labels;
 
 @end
 
@@ -24,6 +26,7 @@
     self = [super init];
     if (self) {
         self.entries = @[];
+        self.labels = [[NSMutableArray alloc] initWithCapacity:10];
     }
     return self;
 }
@@ -32,6 +35,12 @@
     self = [self init];
     self.entries = entries;
     return self;
+}
+
+- (void)handleChoice:(DTFontType)choice {
+    for(DTFontSensitiveLabel *label in self.labels) {
+        [label handleChoice:choice];
+    }
 }
 
 /// Loads the word definition into the definition stack view.
@@ -59,10 +68,9 @@
     ]];
 
     // Then, we add the label that displays the definition.
-    UILabel *definitionLabel = [[UILabel alloc] init];
+    DTFontSensitiveLabel *definitionLabel = [[DTFontSensitiveLabel alloc] initWithSize:15];
     definitionLabel.numberOfLines = 0;
     definitionLabel.text = definition.definition;
-    definitionLabel.font = [UIFont systemFontOfSize:15];
     definitionLabel.textColor = [UIColor colorNamed:@"DictionaryPrimaryLabel"];
     definitionLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [definitionView addSubview:definitionLabel];
@@ -71,6 +79,7 @@
         [definitionLabel.leadingAnchor constraintEqualToAnchor:decorativeView.trailingAnchor constant:20],
         [definitionLabel.trailingAnchor constraintEqualToAnchor:definitionView.trailingAnchor],
     ]];
+    [self.labels addObject:definitionLabel];
 
     // If there's no example, we stretch the definition to cover the view and return.
     if (definition.example == NULL) {
@@ -79,10 +88,9 @@
     }
 
     // If there is, we add the example right below the definition, and stretch that example to the view instead.
-    UILabel *exampleLabel = [[UILabel alloc] init];
+    DTFontSensitiveLabel *exampleLabel = [[DTFontSensitiveLabel alloc] initWithSize:15];
     exampleLabel.numberOfLines = 0;
     exampleLabel.text = [NSString stringWithFormat:@"\"%@\"", definition.example];
-    exampleLabel.font = [UIFont systemFontOfSize:15];
     exampleLabel.textColor = [UIColor colorNamed:@"DictionarySecondaryLabel"];
     exampleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [definitionView addSubview:exampleLabel];
@@ -92,6 +100,7 @@
         [exampleLabel.trailingAnchor constraintEqualToAnchor:definitionView.trailingAnchor],
         [exampleLabel.bottomAnchor constraintEqualToAnchor:definitionView.bottomAnchor],
     ]];
+    [self.labels addObject:exampleLabel];
 }
 
 /// Loads the word meaning into the overall main stack view.
@@ -105,20 +114,13 @@
     UIView *partOfSpeechView = [[UIView alloc] init];
     [stackView addArrangedSubview:partOfSpeechView];
 
-    // The "part of speech" label. Before adding a label, we create a font descriptor
-    // to allow both italic and bold font face.
-    UIFontDescriptor *boldItalicDescriptor = [[UIFontDescriptor alloc] init];
-    UIFontDescriptorSymbolicTraits traits = boldItalicDescriptor.symbolicTraits;
-    traits |= UIFontDescriptorTraitBold;
-    traits |= UIFontDescriptorTraitItalic;
-
-    UILabel *partOfSpeechLabel = [[UILabel alloc] init];
+    // The "part of speech" label.
+    DTFontSensitiveLabel *partOfSpeechLabel = [[DTFontSensitiveLabel alloc] initItalicWithSize:18 weight:DTFontWeightBold];
     partOfSpeechLabel.text = meaning.partOfSpeech;
-    partOfSpeechLabel.font = [UIFont fontWithDescriptor:[boldItalicDescriptor fontDescriptorWithSymbolicTraits:traits]
-                                                   size:18];
     partOfSpeechLabel.textColor = [UIColor colorNamed:@"DictionaryPrimaryLabel"];
     partOfSpeechLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [partOfSpeechView addSubview:partOfSpeechLabel];
+    [self.labels addObject:partOfSpeechLabel];
 
     // Now the separator.
     UIView *partOfSpeechSeparator = [[UIView alloc] init];
@@ -147,11 +149,11 @@
     [stackView addArrangedSubview:meaningStackView];
 
     // Next, we add the "Meaning" label.
-    UILabel *meaningLabel = [[UILabel alloc] init];
+    DTFontSensitiveLabel *meaningLabel = [[DTFontSensitiveLabel alloc] initWithSize:16];
     meaningLabel.textColor = [UIColor colorNamed:@"DictionarySecondaryLabel"];
     meaningLabel.text = @"Meaning";
-    meaningLabel.font = [UIFont systemFontOfSize:16];
     [meaningStackView addArrangedSubview:meaningLabel];
+    [self.labels addObject:meaningLabel];
 
     // Next, we set it up the definition stack view.
     UIStackView *definitionStackView = [[UIStackView alloc] init];
@@ -189,11 +191,11 @@
         NSMutableAttributedString *str = [[NSMutableAttributedString alloc] init];
 
         // Then, we add the attributed underline string.
+        // Well, this sucks, I guess sources can't be changed.
         NSAttributedString *urlString = [[NSAttributedString alloc]
             initWithString:url.absoluteString
                 attributes:@{
                     NSForegroundColorAttributeName : [UIColor colorNamed:@"DictionaryPrimaryLabel"],
-                    NSFontAttributeName : [UIFont systemFontOfSize:14],
                     NSUnderlineStyleAttributeName : @(NSUnderlineStyleSingle),
                 }];
         [str appendAttributedString:urlString];
@@ -218,6 +220,7 @@
         urlButton.titleLabel.lineBreakMode = NSLineBreakByClipping;
         urlButton.titleLabel.lineBreakStrategy = NSLineBreakStrategyNone;
         [urlStackView addArrangedSubview:urlButton];
+        [self.labels addObject:urlButton];
     }
 }
 
@@ -257,18 +260,18 @@
     [overviewStackView addArrangedSubview:spellingStackView];
 
     // The UILabels to draw the spelling.
-    UILabel *spellingLabel = [[UILabel alloc] init];
+    DTFontSensitiveLabel *spellingLabel = [[DTFontSensitiveLabel alloc] initWithSize:32 weight:DTFontWeightBold];
     spellingLabel.text = entry.word;
     spellingLabel.textColor = [UIColor colorNamed:@"DictionaryPrimaryLabel"];
-    spellingLabel.font = [UIFont systemFontOfSize:32 weight:UIFontWeightBold];
     [spellingStackView addArrangedSubview:spellingLabel];
+    [self.labels addObject:spellingLabel];
 
     // The UILabel to draw the phonetic.
-    UILabel *phoneticLabel = [[UILabel alloc] init];
+    DTFontSensitiveLabel *phoneticLabel = [[DTFontSensitiveLabel alloc] initWithSize:18];
     phoneticLabel.text = entry.phonetic;
     phoneticLabel.textColor = [UIColor colorNamed:@"DictionaryPrimary"];
-    phoneticLabel.font = [UIFont systemFontOfSize:18];
     [spellingStackView addArrangedSubview:phoneticLabel];
+    [self.labels addObject:phoneticLabel];
 
     // Let's setup that play button with some image assets we set up in Assets.
     DTPlaySoundButton *playButton = [[DTPlaySoundButton alloc] initWithAudio:entry.firstUsablePhonetic.audio];
@@ -299,15 +302,15 @@
     [mainStackView addArrangedSubview:sourceStackView];
 
     // We add the text "Source" underlined as a label to the source stack view.
-    UILabel *sourceLabel = [[UILabel alloc] init];
+    DTFontSensitiveLabel *sourceLabel = [[DTFontSensitiveLabel alloc] initWithSize:14];
     sourceLabel.attributedText =
         [[NSAttributedString alloc] initWithString:@"Source"
                                         attributes:@{
                                             NSUnderlineStyleAttributeName : @(NSUnderlineStyleSingle),
                                         }];
     sourceLabel.textColor = [UIColor colorNamed:@"DictionarySecondaryLabel"];
-    sourceLabel.font = [UIFont systemFontOfSize:14];
     [sourceStackView addArrangedSubview:sourceLabel];
+    [self.labels addObject:sourceLabel];
 
     // Now we add individual source URLs to the source stack view.
     [self loadWordSources:entry.sources toStack:sourceStackView];

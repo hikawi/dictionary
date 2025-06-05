@@ -28,7 +28,7 @@
 
 - (DTWordPhonetic *)firstUsablePhonetic {
     for (DTWordPhonetic *phonetic in self.phonetics) {
-        if(![phonetic.text isEqualToString:@""] && phonetic.audio != NULL) {
+        if(phonetic.text != NULL && phonetic.audio != NULL) {
             return phonetic;
         }
     }

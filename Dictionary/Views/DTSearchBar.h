@@ -6,6 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DTFontSwitcherChoice.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -22,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /// The UIView component that displays the customized search bar.
-@interface DTSearchBar : UIView
+@interface DTSearchBar : UIView <DTFontSwitcherChoiceDelegate>
 
 @property id<DTSearchBarDelegate> delegate;
 

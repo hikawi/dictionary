@@ -6,12 +6,21 @@
 //
 
 #import "DTErrorViewController.h"
+#import "Utils/DTFontManager.h"
 
-@interface DTErrorViewController ()
+@interface DTErrorViewController () {
+    UILabel *errorLabel;
+    UILabel *detailsLabel;
+}
 
 @end
 
 @implementation DTErrorViewController
+
+- (void)handleChoice:(DTFontType)choice {
+    errorLabel.font = [DTFontManager fontOfSize:20 weight:DTFontWeightBold];
+    detailsLabel.font = [DTFontManager fontOfSize:18];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -40,9 +49,9 @@
     ]];
 
     // Add the "Error" label.
-    UILabel *errorLabel = [[UILabel alloc] init];
+    errorLabel = [[UILabel alloc] init];
     errorLabel.text = @"An error occurred";
-    errorLabel.font = [UIFont systemFontOfSize:20 weight:UIFontWeightBold];
+    errorLabel.font = [DTFontManager fontOfSize:20 weight:DTFontWeightBold];
     errorLabel.textColor = [UIColor colorNamed:@"DictionaryPrimaryLabel"];
     errorLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [mainView addSubview:errorLabel];
@@ -52,11 +61,11 @@
     ]];
 
     // Add the paragraph explaining what that means.
-    UILabel *detailsLabel = [[UILabel alloc] init];
+    detailsLabel = [[UILabel alloc] init];
     detailsLabel.text =
         @"There was a problem loading the definition, could be because of Internet issues, the server being "
         @"down or the code was poorly written. Hopefully try again later?";
-    detailsLabel.font = [UIFont systemFontOfSize:18];
+    detailsLabel.font = [DTFontManager fontOfSize:18];
     detailsLabel.numberOfLines = 0;
     detailsLabel.textColor = [UIColor colorNamed:@"DictionarySecondaryLabel"];
     detailsLabel.textAlignment = NSTextAlignmentCenter;

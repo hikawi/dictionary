@@ -6,12 +6,13 @@
 //
 
 #import "Models/DTWordEntry.h"
+#import "Views/DTFontSwitcherChoice.h"
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 /// The view controller that is responsible for displaying a word entry's data.
-@interface DTWordViewController : UIViewController
+@interface DTWordViewController : UIViewController <DTFontSwitcherChoiceDelegate>
 
 @property DTWordEntry *entry;
 

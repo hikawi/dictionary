@@ -7,11 +7,19 @@
 
 #import "DTEmptyViewController.h"
 
-@interface DTEmptyViewController ()
+@interface DTEmptyViewController () {
+    UILabel *noDefinitionsLabel;
+    UILabel *detailsLabel;
+}
 
 @end
 
 @implementation DTEmptyViewController
+
+- (void)handleChoice:(DTFontType)choice {
+    noDefinitionsLabel.font = [DTFontManager fontOfSize:20 weight:DTFontWeightBold];
+    detailsLabel.font = [DTFontManager fontOfSize:18];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -40,9 +48,9 @@
     ]];
 
     // Add the "No Definitions" label.
-    UILabel *noDefinitionsLabel = [[UILabel alloc] init];
+    noDefinitionsLabel = [[UILabel alloc] init];
     noDefinitionsLabel.text = @"No Definitions Found";
-    noDefinitionsLabel.font = [UIFont systemFontOfSize:20 weight:UIFontWeightBold];
+    noDefinitionsLabel.font = [DTFontManager fontOfSize:20 weight:DTFontWeightBold];
     noDefinitionsLabel.textColor = [UIColor colorNamed:@"DictionaryPrimaryLabel"];
     noDefinitionsLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [mainView addSubview:noDefinitionsLabel];
@@ -52,10 +60,10 @@
     ]];
 
     // Add the paragraph explaining what that means.
-    UILabel *detailsLabel = [[UILabel alloc] init];
+    detailsLabel = [[UILabel alloc] init];
     detailsLabel.text = @"Sorry pal, we couldn't find definitions for the word you were looking for. You can try the "
                         @"search again at later time or head to the web instead.";
-    detailsLabel.font = [UIFont systemFontOfSize:18];
+    detailsLabel.font = [DTFontManager fontOfSize:18];
     detailsLabel.numberOfLines = 0;
     detailsLabel.textColor = [UIColor colorNamed:@"DictionarySecondaryLabel"];
     detailsLabel.textAlignment = NSTextAlignmentCenter;

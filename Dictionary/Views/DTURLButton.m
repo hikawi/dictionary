@@ -25,7 +25,12 @@
     return self;
 }
 
+- (void)handleChoice:(DTFontType)choice {
+    self.titleLabel.font = [DTFontManager fontOfSize:14];
+}
+
 - (void)setup {
+    [self handleChoice:DTFontTypeSansSerif];
     [self addTarget:self action:@selector(buttonDidClick) forControlEvents:UIControlEventTouchUpInside];
 }
 

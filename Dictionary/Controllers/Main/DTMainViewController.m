@@ -19,7 +19,7 @@
 @interface DTMainViewController () <DTSearchBarDelegate, DTFontSwitcherChoiceDelegate>
 
 @property DTSearchBar *searchBar;
-@property UIViewController *childController;
+@property UIViewController<DTFontSwitcherChoiceDelegate> *childController;
 
 @end
 
@@ -27,15 +27,20 @@
 
 @synthesize childController;
 
+/// Delegate that is bubbled up from `DTFontSwitcher`. This should call handler
+/// methods of all UIView instances to update font dynamically.
 - (void)handleChoice:(DTFontType)choice {
-    
+    [self.searchBar handleChoice:choice];
+    if(self.childController) {
+        [self.childController handleChoice:choice];
+    }
 }
 
 /// Sets up a new child controller at a specified location.
 ///
 /// - Parameters:
 ///   - controller: The child controller to add.
-- (void)setupChildController:(UIViewController *)controller {
+- (void)setupChildController:(UIViewController<DTFontSwitcherChoiceDelegate> *)controller {
     if (self.childController != NULL) {
         [self.childController.view removeFromSuperview];
         [self.childController removeFromParentViewController];
@@ -106,22 +111,12 @@
 
     // Put the font switcher.
     DTFontSwitcher *fontSwitcher = [[DTFontSwitcher alloc] init];
+    fontSwitcher.delegate = self;
     [self.view addSubview:fontSwitcher];
     [NSLayoutConstraint activateConstraints:@[
         [fontSwitcher.centerYAnchor constraintEqualToAnchor:iconImageView.centerYAnchor],
         [fontSwitcher.trailingAnchor constraintEqualToAnchor:verticalSeparator.leadingAnchor constant:-16],
     ]];
-
-    //    UIButton *fontSwitcher = [UIButton buttonWithType:UIButtonTypeSystem];
-    //    [fontSwitcher setTitle:@"Hello" forState:UIControlStateNormal];
-    //    [fontSwitcher addTarget:self action:@selector(fontDidSwitch) forControlEvents:UIControlEventTouchUpInside];
-    //    fontSwitcher.translatesAutoresizingMaskIntoConstraints = NO;
-    //    [self.view addSubview:fontSwitcher];
-    //    [NSLayoutConstraint activateConstraints:@[
-    //        [fontSwitcher.centerYAnchor constraintEqualToAnchor:iconImageView.centerYAnchor],
-    //        [fontSwitcher.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor
-    //        constant:-16],
-    //    ]];
 
     // Put the search bar right below.
     self.searchBar = [[DTSearchBar alloc] init];
@@ -186,6 +181,23 @@
             [phoneticsArray addObject:phonetic];
         }
         entry.phonetics = phoneticsArray;
+
+        // Recheck the main phonetic if it is set.
+        if(entry.phonetic == NULL) {
+            // Find one usable phonetic from the array.
+            DTWordPhonetic *first = entry.firstUsablePhonetic;
+
+            NSLog(@"%@ - %@", first.text, first.audio);
+            if(first != NULL && first.text != NULL) {
+                entry.phonetic = first.text;
+            } else if(entry.phonetics.count > 0) {
+                // Just get the first.
+                entry.phonetic = entry.phonetics[0].text;
+            } else {
+                // Bro.
+                entry.phonetic = @"N/A";
+            }
+        }
 
         // Let's tackle meanings now.
         NSMutableArray *meaningsArray = [[NSMutableArray alloc] init];

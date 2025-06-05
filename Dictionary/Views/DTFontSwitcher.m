@@ -32,6 +32,9 @@
 /// Updates the label of the font switcher and delegates up to the main view controller.
 - (void)handleChoice:(DTFontType)choice {
     [self updateLabel];
+    if(self.delegate) {
+        [self.delegate handleChoice:choice];
+    }
 }
 
 - (void)updateLabel {
